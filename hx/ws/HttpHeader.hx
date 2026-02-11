@@ -2,8 +2,8 @@ package hx.ws;
 
 class HttpHeader {
     public static inline var SEC_WEBSOCKET_KEY:String = "Sec-WebSocket-Key";
-    public static inline var SEC_WEBSOSCKET_ACCEPT:String = "Sec-WebSocket-Accept";
-    public static inline var SEC_WEBSOSCKET_VERSION:String = "Sec-WebSocket-Version";
+    public static inline var SEC_WEBSOCKET_ACCEPT:String = "Sec-WebSocket-Accept";
+    public static inline var SEC_WEBSOCKET_VERSION:String = "Sec-WebSocket-Version";
     public static inline var SEC_WEBSOCKET_PROTOCOL:String = "Sec-WebSocket-Protocol";
     public static inline var UPGRADE:String = "Upgrade";
     public static inline var HOST:String = "Host";

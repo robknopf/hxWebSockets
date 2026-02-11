@@ -38,31 +38,44 @@ class WebSocketHandler extends Handler {
 
     public function handshake(httpRequest:HttpRequest) {
         var httpResponse = new HttpResponse();
+        function reqHeader(name:String):Null<String> {
+            var exact = httpRequest.headers.get(name);
+            if (exact != null) {
+                return exact;
+            }
+            var lower = name.toLowerCase();
+            for (k in httpRequest.headers.keys()) {
+                if (k != null && k.toLowerCase() == lower) {
+                    return httpRequest.headers.get(k);
+                }
+            }
+            return null;
+        }
 
-        httpResponse.headers.set(HttpHeader.SEC_WEBSOSCKET_VERSION, "13");
+        httpResponse.headers.set(HttpHeader.SEC_WEBSOCKET_VERSION, "13");
         if (httpRequest.method != "GET" || httpRequest.httpVersion != "HTTP/1.1") {
             httpResponse.code = 400;
             httpResponse.text = "Bad";
             httpResponse.headers.set(HttpHeader.CONNECTION, "close");
             httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Bad request');
-        } else if (httpRequest.headers.get(HttpHeader.SEC_WEBSOSCKET_VERSION) != "13") {
+        } else if (reqHeader(HttpHeader.SEC_WEBSOCKET_VERSION) != "13") {
             httpResponse.code = 426;
             httpResponse.text = "Upgrade";
             httpResponse.headers.set(HttpHeader.CONNECTION, "close");
-            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported websocket client version: ${httpRequest.headers.get(HttpHeader.SEC_WEBSOSCKET_VERSION)}, Only version 13 is supported.');
-        } else if (httpRequest.headers.get(HttpHeader.UPGRADE) != "websocket") {
+            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported websocket client version: ${reqHeader(HttpHeader.SEC_WEBSOCKET_VERSION)}, Only version 13 is supported.');
+        } else if (reqHeader(HttpHeader.UPGRADE) == null || reqHeader(HttpHeader.UPGRADE).toLowerCase() != "websocket") {
             httpResponse.code = 426;
             httpResponse.text = "Upgrade";
             httpResponse.headers.set(HttpHeader.CONNECTION, "close");
-            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported upgrade header: ${httpRequest.headers.get(HttpHeader.UPGRADE)}.');
-        } else if (httpRequest.headers.get(HttpHeader.CONNECTION).indexOf("Upgrade") == -1) {
+            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported upgrade header: ${reqHeader(HttpHeader.UPGRADE)}.');
+        } else if (reqHeader(HttpHeader.CONNECTION) == null || reqHeader(HttpHeader.CONNECTION).toLowerCase().indexOf("upgrade") == -1) {
             httpResponse.code = 426;
             httpResponse.text = "Upgrade";
             httpResponse.headers.set(HttpHeader.CONNECTION, "close");
-            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported connection header: ${httpRequest.headers.get(HttpHeader.CONNECTION)}.');
+            httpResponse.headers.set(HttpHeader.X_WEBSOCKET_REJECT_REASON, 'Unsupported connection header: ${reqHeader(HttpHeader.CONNECTION)}.');
         } else {
             Log.debug('Handshaking', id);
-            var key = httpRequest.headers.get(HttpHeader.SEC_WEBSOCKET_KEY);
+            var key = reqHeader(HttpHeader.SEC_WEBSOCKET_KEY);
             var result = makeWSKeyResponse(key);
             Log.debug('Handshaking key - ${result}', id);
 
@@ -70,7 +83,7 @@ class WebSocketHandler extends Handler {
             httpResponse.text = "Switching Protocols";
             httpResponse.headers.set(HttpHeader.UPGRADE, "websocket");
             httpResponse.headers.set(HttpHeader.CONNECTION, "Upgrade");
-            httpResponse.headers.set(HttpHeader.SEC_WEBSOSCKET_ACCEPT, result);
+            httpResponse.headers.set(HttpHeader.SEC_WEBSOCKET_ACCEPT, result);
         }
         
         function callback(httpResponse: HttpResponse) {
