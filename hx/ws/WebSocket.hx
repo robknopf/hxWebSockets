@@ -366,15 +366,29 @@ class WebSocket extends WebSocketCommon {
     }
 
     private function handshake(httpResponse:HttpResponse) {
+        function resHeader(name:String):Null<String> {
+            var exact = httpResponse.headers.get(name);
+            if (exact != null) {
+                return exact;
+            }
+            var lower = name.toLowerCase();
+            for (k in httpResponse.headers.keys()) {
+                if (k != null && k.toLowerCase() == lower) {
+                    return httpResponse.headers.get(k);
+                }
+            }
+            return null;
+        }
+
         if (httpResponse.code != 101) {
             if (onerror != null) {
-                onerror(httpResponse.headers.get(HttpHeader.X_WEBSOCKET_REJECT_REASON));
+                onerror(resHeader(HttpHeader.X_WEBSOCKET_REJECT_REASON));
             }
             close();
             return;
         }
 
-        var secKey = httpResponse.headers.get(HttpHeader.SEC_WEBSOCKET_ACCEPT);
+        var secKey = resHeader(HttpHeader.SEC_WEBSOCKET_ACCEPT);
         
         if(secKey == null) {
             trace("This server does not implement Sec-WebSocket-Key.");
@@ -388,7 +402,7 @@ class WebSocket extends WebSocketCommon {
             }
         }
         
-        var protocol = httpResponse.headers.get(HttpHeader.SEC_WEBSOCKET_PROTOCOL);
+        var protocol = resHeader(HttpHeader.SEC_WEBSOCKET_PROTOCOL);
         if (protocol != null) {
             this.protocol = protocol;
         }
