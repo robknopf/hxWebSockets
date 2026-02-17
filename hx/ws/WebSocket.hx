@@ -326,7 +326,7 @@ class WebSocket extends WebSocketCommon {
 
         httpRequest.headers.set(HttpHeader.HOST, _host + ":" + _port);
         httpRequest.headers.set(HttpHeader.USER_AGENT, "hxWebSockets");
-        httpRequest.headers.set(HttpHeader.SEC_WEBSOSCKET_VERSION, "13");
+        httpRequest.headers.set(HttpHeader.SEC_WEBSOCKET_VERSION, "13");
         httpRequest.headers.set(HttpHeader.UPGRADE, "websocket");
         httpRequest.headers.set(HttpHeader.CONNECTION, "Upgrade");
         httpRequest.headers.set(HttpHeader.PRAGMA, "no-cache");
@@ -374,7 +374,7 @@ class WebSocket extends WebSocketCommon {
             return;
         }
 
-        var secKey = httpResponse.headers.get(HttpHeader.SEC_WEBSOSCKET_ACCEPT);
+        var secKey = httpResponse.headers.get(HttpHeader.SEC_WEBSOCKET_ACCEPT);
         
         if(secKey == null) {
             trace("This server does not implement Sec-WebSocket-Key.");
